@@ -13,6 +13,8 @@ elif [ "$1" = "down" ]; then
   networkDown
 elif [ "$1" = "rerun" ]; then
   networkRerun
+elif [ "$1" = "chaincodes" ] && [ "$2" = "install" ]; then
+  installChaincodes
 elif [ "$1" = "help" ]; then
   printHelp
 elif [ "$1" = "--help" ]; then
