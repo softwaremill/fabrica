@@ -4,7 +4,6 @@ FROM node:14-alpine
 ENV HOME /home/yeoman
 
 RUN apk add --no-cache sudo
-
 # Add a yeoman user because Yeoman freaks out and runs setuid(501).
 # This was because less technical people would run Yeoman as root and cause problems.
 # Setting uid to 501 here since it's already a random number being thrown around.
@@ -18,20 +17,41 @@ COPY generators /fabrikka/generators
 COPY docs /fabrikka/docs
 COPY package.json /fabrikka/
 COPY package-lock.json /fabrikka/
-
 COPY samples /fabrikka/samples
+
+#RUN sudo apt-get update
+RUN apk add --no-cache curl
+#&& apt-get install curl
+
+# Install docker binary
+ARG DOCKER_CHANNEL=stable
+ARG DOCKER_VERSION=18.06.3-ce
+RUN curl -fsSL "https://download.docker.com/linux/static/${DOCKER_CHANNEL}/x86_64/docker-${DOCKER_VERSION}.tgz" \
+  | tar -xzC /usr/local/bin --strip=1 docker/docker
+
+# Install docker-compose
+ARG DOCKER_COMPOSE_VERSION=1.26.2
+RUN curl -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" \
+    -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose
+
+RUN npm install --global --silent yo
+
+RUN sudo chown -R yeoman:yeoman /fabrikka
+RUN sudo chown -R yeoman:yeoman /home/yeoman
+RUN sudo chown -R yeoman:yeoman /usr/local/lib/node_modules
+USER yeoman
 
 WORKDIR /fabrikka
 
-RUN npm install --global --silent yo
 RUN npm install
 RUN npm link
 
-USER yeoman
+WORKDIR /fabrikka/samples
 
-RUN cd samples
-RUN yo fabrikka:setup-compose fabrikkaConfig-1org-1channel-1chaincode.json
+RUN yo --no-insight fabrikka:setup-compose fabrikkaConfig-1org-1channel-1chaincode.json
 
-CMD ["bash"]
+USER root
 
-#https://www.octobot.io/blog/2016-02-25-running-yeoman-in-a-development-instance-in-docker/
+RUN chmod +x *.sh
+
+CMD ["sh"]
