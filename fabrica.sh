@@ -45,7 +45,7 @@ generateNetworkConfig() {
 
   echo "Generating network config"
   echo "    FABRICA_CONFIG:       $FABRICA_CONFIG"
-  echo "    CHAINCODES_BASE_DIR:   $CHAINCODES_BASE_DIR"
+  echo "    CHAINCODES_BASE_DIR:  $CHAINCODES_BASE_DIR"
   echo "    FABRICA_NETWORK_ROOT: $FABRICA_NETWORK_ROOT"
 
   mkdir -p "$FABRICA_NETWORK_ROOT"
