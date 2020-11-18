@@ -1,6 +1,5 @@
 #!/bin/bash
-
-set -eu
+set -o allexport
 
 FABRIKKA_NETWORK_ROOT="$(cd "$(dirname "$0")" && pwd)"
 
@@ -9,6 +8,9 @@ source "$FABRIKKA_NETWORK_ROOT/fabric-docker/scripts/base-functions.sh"
 source "$FABRIKKA_NETWORK_ROOT/fabric-docker/scripts/chaincode-functions.sh"
 source "$FABRIKKA_NETWORK_ROOT/fabric-docker/commands-generated.sh"
 source "$FABRIKKA_NETWORK_ROOT/fabric-docker/.env"
+
+set +o allexport
+set -eu
 
 function networkUp() {
   generateArtifacts

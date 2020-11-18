@@ -19,6 +19,8 @@ services:
     command: sh -c 'fabric-ca-server start -b ${ROOT_CA_ADMIN_NAME}:${ROOT_CA_ADMIN_PASSWORD} -d'
     volumes:
       - ../fabric-config/crypto-config/ordererOrganizations/<%= rootOrg.organization.domain %>/ca/:/etc/hyperledger/fabric-ca-server/crypto
+#      - ./state/<%= rootOrg.organization.domain %>/<%= rootCaFullName %>/fabric-ca-server.db:/etc/hyperledger/fabric-ca-server/fabric-ca-server.db
+    user: ${USER_ID}:${GROUP_ID}
     networks:
       - basic
   <% for (ordererNo in rootOrg.orderers) {
@@ -53,6 +55,8 @@ services:
       - ../fabric-config/config/:/var/hyperledger/config
       - ../fabric-config/crypto-config/ordererOrganizations/<%= orderer.domain %>/orderers/<%= orderer.address %>/msp/:/var/hyperledger/orderer/msp
       - ../fabric-config/crypto-config/ordererOrganizations/<%= orderer.domain %>/orderers/<%= orderer.address %>/tls/:/var/hyperledger/orderer/tls
+#  - ./state/<%= orderer.domain %>/<%= orderer.address %>/:/var/hyperledger/production/orderer
+    user: ${USER_ID}:${GROUP_ID}
     networks:
       - basic
   <% } %>
@@ -79,6 +83,8 @@ services:
     command: sh -c 'fabric-ca-server start -b ${<%= caUserVariable %>}:${<%= caPassVariable %>} -d'
     volumes:
       - ../fabric-config/crypto-config/peerOrganizations/<%= org.organization.domain %>/ca/:/etc/hyperledger/fabric-ca-server/crypto
+      #      - ./state/<%= org.organization.domain %>/<%= orgCaFullName %>/fabric-ca-server.db:/etc/hyperledger/fabric-ca-server/fabric-ca-server.db
+    user: ${USER_ID}:${GROUP_ID}
     networks:
       - basic
   <% } %>
@@ -113,6 +119,7 @@ services:
       - ../fabric-config/config:/var/hyperledger/cli/config/ # genesis.block and channel.tx's
       - ../fabric-config/crypto-config/ordererOrganizations/<%= rootOrg.organization.domain %>/orderers/<%= rootOrg.ordererHead.address %>/:/var/hyperledger/cli/crypto/daTls # TODO ! To ease up deployment, not proper.<% chaincodes.forEach(function(chaincode) { %>
       - "$CHAINCODES_BASE_DIR/<%= chaincode.directory %>/:/var/hyperledger/cli/<%= chaincode.name %>/"<% }) %>
+    user: ${USER_ID}:${GROUP_ID}
     networks:
       - basic
   <% for(var peerNo=0; peerNo<org.peer.instances; peerNo++) {
@@ -163,8 +170,10 @@ services:
       - ../fabric-config/crypto-config/peerOrganizations/<%= org.organization.domain %>/peers/<%= peerFullName %>/tls:/etc/hyperledger/fabric/peer/tls
       - ../fabric-config/crypto-config/peerOrganizations/<%= org.organization.domain %>/users:/etc/hyperledger/fabric/peer/msp/users
       - ../fabric-config/config:/etc/hyperledger/fabric/config
+      - ./state/<%= org.organization.domain %>/<%= peerFullName %>/:/var/hyperledger/production
     depends_on:
       - <%= rootOrg.ordererHead.address %>
+    user: ${USER_ID}:${GROUP_ID}
     networks:
       - basic
   <% if(couchDdEnabled) { %>
@@ -176,6 +185,7 @@ services:
       - COUCHDB_PASSWORD=<%= peerName %>Password
     ports:
       - <%= dbHostPortToUse %>:5984
+    user: ${USER_ID}:${GROUP_ID}
     networks:
       - basic<% } // end of CouchDB if %>
   <% } // end of peer loop %>
