@@ -2,7 +2,7 @@
 
 | Test case                 | 01    | 02    | 03    |
 | ------------------------- |:-----:|:-----:|:-----:|
-| Fabric version            | 1.4.6 | 1.4.6 | ???   |
+| Fabric version            | 1.4.6 | 1.4.6 | 2.2.1 |
 | TLS                       | no    | yes   | yes   |
 | Channel capabilities      | v1_4_3| v1_4_3| v1_4_3|
 | Consensus                 | solo  | RAFT  | RAFT  |

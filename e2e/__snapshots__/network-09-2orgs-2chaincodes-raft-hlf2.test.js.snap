@@ -8,17 +8,6 @@ exports[`network-09-2orgs-2chaincodes-raft-hlf2 should create proper e2e/__tmp__
 
 exports[`network-09-2orgs-2chaincodes-raft-hlf2 should create proper e2e/__tmp__/network-09-2orgs-2chaincodes-raft-hlf2/fabrica-target/fabric-config/configtx.yaml from samples/fabricaConfig-2orgs-2channels-2chaincodes-tls-raft-hlf2.json 1`] = `
 "################################################################################
-#   SECTION: Capabilities
-################################################################################
-Capabilities:
-    Channel: &ChannelCapabilities
-        V1_4_3: true
-    Orderer: &OrdererCapabilities
-        V1_4_2: true
-    Application: &ApplicationCapabilities
-        V1_4_2: true
-
-################################################################################
 #   CHANNEL Defaults
 ################################################################################
 Channel: &ChannelDefaults
@@ -33,7 +22,6 @@ Channel: &ChannelDefaults
             Type: ImplicitMeta
             Rule: \\"MAJORITY Admins\\"
     Capabilities:
-        <<: *ChannelCapabilities
 
 ################################################################################
 #   Section: Organizations
@@ -44,10 +32,34 @@ Organizations:
       ID: OrdererMSP
       MSPDir: crypto-config/ordererOrganizations/root.com/msp
 
+      Policies:
+          Readers:
+              Type: Signature
+              Rule: \\"OR('OrdererMSP.member')\\"
+          Writers:
+              Type: Signature
+              Rule: \\"OR('OrdererMSP.member')\\"
+          Admins:
+              Type: Signature
+              Rule: \\"OR('OrdererMSP.admin')\\"
     - &Org1
       Name: Org1MSP
       ID: Org1MSP
       MSPDir: crypto-config/peerOrganizations/org1.com/msp
+
+      Policies:
+          Readers:
+              Type: Signature
+              Rule: \\"OR('Org1MSP.admin', 'Org1MSP.peer', 'Org1MSP.client')\\"
+          Writers:
+              Type: Signature
+              Rule: \\"OR('Org1MSP.admin', 'Org1MSP.client')\\"
+          Admins:
+              Type: Signature
+              Rule: \\"OR('Org1MSP.admin')\\"
+          Endorsement:
+              Type: Signature
+              Rule: \\"OR('Org1MSP.peer')\\"
       AnchorPeers:
           - Host: peer0.org1.com
             Port: 7051
@@ -55,6 +67,20 @@ Organizations:
       Name: Org2MSP
       ID: Org2MSP
       MSPDir: crypto-config/peerOrganizations/org2.com/msp
+
+      Policies:
+          Readers:
+              Type: Signature
+              Rule: \\"OR('Org2MSP.admin', 'Org2MSP.peer', 'Org2MSP.client')\\"
+          Writers:
+              Type: Signature
+              Rule: \\"OR('Org2MSP.admin', 'Org2MSP.client')\\"
+          Admins:
+              Type: Signature
+              Rule: \\"OR('Org2MSP.admin')\\"
+          Endorsement:
+              Type: Signature
+              Rule: \\"OR('Org2MSP.peer')\\"
       AnchorPeers:
           - Host: peer0.org2.com
             Port: 7051
@@ -65,7 +91,26 @@ Organizations:
 Application: &ApplicationDefaults
     Organizations:
     Capabilities:
-        <<: *ApplicationCapabilities
+
+    # Policies defines the set of policies at this level of the config tree
+    # For Application policies, their canonical path is
+    #   /Channel/Application/<PolicyName>
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: \\"ANY Readers\\"
+        Writers:
+            Type: ImplicitMeta
+            Rule: \\"ANY Writers\\"
+        Admins:
+            Type: ImplicitMeta
+            Rule: \\"MAJORITY Admins\\"
+        LifecycleEndorsement:
+            Type: ImplicitMeta
+            Rule: \\"MAJORITY Endorsement\\"
+        Endorsement:
+            Type: ImplicitMeta
+            Rule: \\"MAJORITY Endorsement\\"
 
 ################################################################################
 #   SECTION: Orderer
@@ -99,6 +144,24 @@ Orderer: &OrdererDefaults
         AbsoluteMaxBytes: 99 MB
         PreferredMaxBytes: 512 KB
     Organizations:
+    # Policies defines the set of policies at this level of the config tree
+    # For Orderer policies, their canonical path is
+    #   /Channel/Orderer/<PolicyName>
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: \\"ANY Readers\\"
+        Writers:
+            Type: ImplicitMeta
+            Rule: \\"ANY Writers\\"
+        Admins:
+            Type: ImplicitMeta
+            Rule: \\"MAJORITY Admins\\"
+        # BlockValidation specifies what signatures must be included in the block
+        # from the orderer for the peer to validate it.
+        BlockValidation:
+            Type: ImplicitMeta
+            Rule: \\"ANY Writers\\"
 
 ################################################################################
 #   Profile
@@ -113,7 +176,7 @@ Profiles:
             Organizations:
                 - *OrdererOrg
             Capabilities:
-                <<: *OrdererCapabilities
+
         Consortiums:
             SampleConsortium:
                 Organizations:
@@ -128,7 +191,6 @@ Profiles:
                 - *Org1
                 - *Org2
             Capabilities:
-                <<: *ApplicationCapabilities
 "
 `;
 
@@ -226,8 +288,8 @@ CHAINCODES_BASE_DIR=<absolute path>
 COMPOSE_PROJECT_NAME=<name with timestamp>
 LOGGING_LEVEL=info
 
-FABRIC_VERSION=1.4.6
-FABRIC_CA_VERSION=1.4.6
+FABRIC_VERSION=2.2.1
+FABRIC_CA_VERSION=1.4.9
 
 ROOT_CA_ADMIN_NAME=admin
 ROOT_CA_ADMIN_PASSWORD=adminpw
