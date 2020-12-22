@@ -4,8 +4,8 @@ TEST_TMP="$(rm -rf "$0.tmpdir" && mkdir -p "$0.tmpdir" && (cd "$0.tmpdir" && pwd
 TEST_LOGS="$(mkdir -p "$0.logs" && (cd "$0.logs" && pwd))"
 FABRICA_HOME="$TEST_TMP/../.."
 
-# testing absolute path
-CONFIG="$FABRICA_HOME/samples/fabricaConfig-2orgs-2channels-2chaincodes-tls-raft-hlf2.json"
+# testing absolute path FIXME
+CONFIG="$FABRICA_HOME/samples/fabricaConfig-2orgs-2channels-1chaincode-tls-raft-hlf2.json"
 
 networkUpAsync() {
   "$FABRICA_HOME/fabrica-build.sh" &&
@@ -59,16 +59,14 @@ waitForContainer "ca.root.com" "Listening on http://0.0.0.0:7054" &&
   waitForContainer "orderer2.root.com" "Starting Raft node channel=my-channel1" &&
   waitForContainer "orderer2.root.com" "Starting Raft node channel=my-channel2" &&
   waitForContainer "ca.org1.com" "Listening on http://0.0.0.0:7054" &&
-  waitForContainer "peer0.org1.com" "Elected as a leader, starting delivery service for channel my-channel1" &&
-  waitForContainer "peer1.org1.com" "Elected as a leader, starting delivery service for channel my-channel2" &&
+#  waitForContainer "peer0.org1.com" "Elected as a leader, starting delivery service for channel my-channel1" &&
+#  waitForContainer "peer1.org1.com" "Elected as a leader, starting delivery service for channel my-channel2" &&
   waitForContainer "ca.org2.com" "Listening on http://0.0.0.0:7054" &&
-  waitForContainer "peer0.org2.com" "Elected as a leader, starting delivery service for channel my-channel1" &&
-  waitForContainer "peer1.org2.com" "Elected as a leader, starting delivery service for channel my-channel2" &&
+#  waitForContainer "peer0.org2.com" "Elected as a leader, starting delivery service for channel my-channel1" &&
+#  waitForContainer "peer1.org2.com" "Elected as a leader, starting delivery service for channel my-channel2" &&
 
   waitForChaincode "cli.org1.com" "peer0.org1.com" "my-channel1" "chaincode1" "0.0.1" &&
   waitForChaincode "cli.org2.com" "peer0.org2.com" "my-channel1" "chaincode1" "0.0.1" &&
-  waitForChaincode "cli.org1.com" "peer1.org1.com" "my-channel2" "chaincode2" "0.0.1" &&
-  waitForChaincode "cli.org2.com" "peer1.org2.com" "my-channel2" "chaincode2" "0.0.1" &&
 
   expectInvoke "cli.org1.com" "peer0.org1.com" "my-channel1" "chaincode1" \
     '{"Args":["KVContract:put", "name", "Harry Potter"]}' \
@@ -76,10 +74,4 @@ waitForContainer "ca.root.com" "Listening on http://0.0.0.0:7054" &&
   expectInvoke "cli.org2.com" "peer0.org2.com" "my-channel1" "chaincode1" \
     '{"Args":["KVContract:get", "name"]}' \
     '{\"success\":\"Harry Potter\"}' &&
-  expectInvoke "cli.org1.com" "peer1.org1.com" "my-channel2" "chaincode2" \
-    '{"Args":["PokeballContract:createPokeball", "id1", "Pokeball 1"]}' \
-    'status:200' &&
-  expectInvoke "cli.org2.com" "peer1.org2.com" "my-channel2" "chaincode2" \
-    '{"Args":["PokeballContract:readPokeball", "id1"]}' \
-    '{\"value\":\"Pokeball 1\"}' &&
   networkDown || (networkDown && exit 1)
