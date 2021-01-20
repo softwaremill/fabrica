@@ -1,12 +1,14 @@
 #!/bin/bash
 
 function prepareChaincodeDirs() {
+  <% if (!chaincodes || !chaincodes.length) { %> echo "No chaincodes" <% } %>
   <% chaincodes.forEach(function(chaincode) { %>
     mkdir -p "$CHAINCODES_BASE_DIR/<%= chaincode.directory %>"
   <% }) -%>
 }
 
 function installChaincodes() {
+  <% if (!chaincodes || !chaincodes.length) { %> echo "No chaincodes" <% } %>
   <% chaincodes.forEach(function(chaincode) { -%>
     <%- include('commands-generated-node-build.sh.ejs', {chaincode: chaincode}); -%>
     <% chaincode.channel.orgs.forEach(function (org) {
