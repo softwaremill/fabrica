@@ -1,6 +1,7 @@
 OrdererOrgs:
   - Name: <%= rootOrg.organization.name  %>
     Domain: <%= rootOrg.organization.domain  %>
+    EnableNodeOUs: true
     Specs:<% rootOrg.orderers.forEach(function(orderer) { %>
       - Hostname: <%= orderer.name  %>
 <% }) -%>
