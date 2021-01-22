@@ -33,7 +33,7 @@
       },
       "peer": {
         "prefix": "peer",
-        "instances": 2,
+        "instances": 1,
         "db": "LevelDb"
       }
     }
@@ -45,12 +45,6 @@
       "orgs": [
         {
           "key": "org1",
-          "peers": [
-            "peer0"
-          ]
-        },
-        {
-          "key": "org2",
           "peers": [
             "peer0"
           ]
