@@ -206,6 +206,41 @@ function getCaVersion(fabricVersion) {
   return caVersion[fabricVersion] || fabricVersion;
 }
 
+function transformGraylogSettings(networkSettingsJson) {
+  if ('monitoring' in networkSettingsJson && 'grayLog' in networkSettingsJson.monitoring) {
+    const image = ('image' in networkSettingsJson.monitoring.grayLog) ? networkSettingsJson.monitoring.grayLog.image : 'graylog/graylog';
+    const { versionTag } = networkSettingsJson.monitoring.grayLog;
+
+    const mongoImage = ('mongoImage' in networkSettingsJson.monitoring.grayLog) ? networkSettingsJson.monitoring.grayLog.mongoImage : 'mongo';
+    const mongoVersionTag = ('mongoVersionTag' in networkSettingsJson.monitoring.grayLog) ? networkSettingsJson.monitoring.grayLog.mongoVersionTag : '4.2';
+
+    const elasticImage = ('elasticImage' in networkSettingsJson.monitoring.grayLog) ? networkSettingsJson.monitoring.grayLog.elasticImage : 'docker.elastic.co/elasticsearch/elasticsearch-oss';
+    const elasticVersionTag = ('elasticVersionTag' in networkSettingsJson.monitoring.grayLog) ? networkSettingsJson.monitoring.grayLog.elasticVersionTag : '7.10.0';
+    return {
+      enableGrayLog: true,
+      graylogImageFull: `${image}:${versionTag}`,
+      mongoImageFull: `${mongoImage}:${mongoVersionTag}`,
+      elasticImageFull: `${elasticImage}:${elasticVersionTag}`,
+    };
+  }
+  return {};
+}
+
+function transformNetworkSettings(networkSettingsJson) {
+  const graylogSettings = transformGraylogSettings(networkSettingsJson);
+  const isHLF20 = isHlf20(networkSettingsJson.fabricVersion);
+  const fabricCaVersion = getCaVersion(networkSettingsJson.fabricVersion);
+
+  return {
+    fabricVersion: networkSettingsJson.fabricVersion,
+    fabricCaVersion,
+    tls: networkSettingsJson.tls,
+    isHLF20,
+    monitoring: networkSettingsJson.monitoring,
+    ...(graylogSettings),
+  };
+}
+
 function getEnvVarOrThrow(name) {
   const value = process.env[name];
   if (!value || !value.length) throw new Error(`Missing environment variable ${name}`);
@@ -219,13 +254,34 @@ function getPathsFromEnv() {
   };
 }
 
+function transformFabricaConfig(fabricaConfig) {
+  const capabilities = getNetworkCapabilities(fabricaConfig.networkSettings.fabricVersion);
+  const rootOrg = transformRootOrgConfig(fabricaConfig.rootOrg);
+  const orgs = transformOrgConfigs(fabricaConfig.orgs);
+  const channels = transformChannelConfigs(fabricaConfig.channels, orgs);
+  const chaincodes = transformChaincodesConfig(fabricaConfig.chaincodes, channels);
+  const settings = transformNetworkSettings(fabricaConfig.networkSettings);
+
+  return {
+    networkSettings: settings,
+
+    capabilities,
+    rootOrg,
+    orgs,
+    channels,
+    chaincodes,
+  };
+}
+
 module.exports = {
   transformChaincodesConfig,
   transformRootOrgConfig,
   transformOrgConfigs,
   transformChannelConfigs,
+  transformNetworkSettings,
   getNetworkCapabilities,
   getCaVersion,
   getPathsFromEnv,
+  transformFabricaConfig,
   isHlf20,
 };

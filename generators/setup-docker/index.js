@@ -8,7 +8,7 @@ const config = require('../config');
 const utils = require('../utils/utils');
 const buildUtil = require('../version/buildUtil');
 
-const configTransformers = require('./configTransformers');
+const { transformFabricaConfig, getPathsFromEnv } = require('../extendConfig/configTransformers');
 
 const ValidateGeneratorType = require.resolve('../validate');
 
@@ -29,26 +29,22 @@ module.exports = class extends Generator {
       this.options.fabricaConfig, this.env.cwd,
     );
 
+    const fabricaConfig = this.fs.readJSON(this.options.fabricaConfigPath);
     const {
+      capabilities,
+      rootOrg,
+      orgs,
+      channels,
+      chaincodes,
       networkSettings,
-      rootOrg: rootOrgJson,
-      orgs: orgsJson,
-      channels: channelsJson,
-      chaincodes: chaincodesJson,
-    } = this.fs.readJSON(this.options.fabricaConfigPath);
+    } = transformFabricaConfig(fabricaConfig);
 
     const dateString = new Date().toISOString().substring(0, 16).replace(/[^0-9]+/g, '');
     const composeNetworkName = `fabrica_network_${dateString}`;
 
     this.log(`Used network config: ${this.options.fabricaConfigPath}`);
-    this.log(`Fabric version is: ${networkSettings.fabricVersion}`);
+    this.log(`Fabric version is: ${fabricaConfig.networkSettings.fabricVersion}`);
     this.log(`Generating docker-compose network '${composeNetworkName}'...`);
-
-    const capabilities = configTransformers.getNetworkCapabilities(networkSettings.fabricVersion);
-    const rootOrg = configTransformers.transformRootOrgConfig(rootOrgJson);
-    const orgs = configTransformers.transformOrgConfigs(orgsJson);
-    const channels = configTransformers.transformChannelConfigs(channelsJson, orgs);
-    const chaincodes = configTransformers.transformChaincodesConfig(chaincodesJson, channels);
 
     // ======= fabric-config ============================================================
     this._copyRootOrgCryptoConfig(rootOrg);
@@ -77,7 +73,6 @@ module.exports = class extends Generator {
   _copyConfigTx(capabilities, networkSettings, rootOrg, orgs) {
     const settings = {
       capabilities,
-      isHlf20: configTransformers.isHlf20(networkSettings.fabricVersion),
       networkSettings,
       rootOrg,
       orgs,
@@ -116,14 +111,12 @@ module.exports = class extends Generator {
   }
 
   _copyDockerComposeEnv(networkSettings, orgsTransformed, composeNetworkName) {
-    const fabricCaVersion = configTransformers.getCaVersion(networkSettings.fabricVersion);
     const monitoring = { loglevel: 'info', ...(networkSettings.monitoring || {}) };
     const settings = {
       composeNetworkName,
-      fabricCaVersion,
       networkSettings: { ...networkSettings, monitoring },
       orgs: orgsTransformed,
-      paths: configTransformers.getPathsFromEnv(),
+      paths: getPathsFromEnv(),
       fabricaVersion: config.version,
       fabricaBuild: buildUtil.getBuildInfo(),
     };
@@ -187,14 +180,5 @@ module.exports = class extends Generator {
       this.templatePath('fabric-docker/scripts/chaincode-functions.sh'),
       this.destinationPath('fabric-docker/scripts/chaincode-functions.sh'),
     );
-  }
-
-  _getFullPathOf(configFile) {
-    const currentPath = this.env.cwd;
-    return `${currentPath}/${configFile}`;
-  }
-
-  _displayHelp() {
-    this.log('helpful help for this command !');
   }
 };

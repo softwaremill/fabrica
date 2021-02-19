@@ -6,7 +6,7 @@
 const Generator = require('yeoman-generator');
 const utils = require('../utils/utils');
 
-const configTransformers = require('../setup-docker/configTransformers');
+const configTransformers = require('./configTransformers');
 
 const ValidateGeneratorType = require.resolve('../validate');
 
@@ -27,27 +27,8 @@ module.exports = class extends Generator {
       this.options.fabricaConfig, this.env.cwd,
     );
 
-    const {
-      networkSettings,
-      rootOrg: rootOrgJson,
-      orgs: orgsJson,
-      channels: channelsJson,
-      chaincodes: chaincodesJson,
-    } = this.fs.readJSON(this.options.fabricaConfigPath);
-
-    const capabilities = configTransformers.getNetworkCapabilities(networkSettings.fabricVersion);
-    const rootOrg = configTransformers.transformRootOrgConfig(rootOrgJson);
-    const orgs = configTransformers.transformOrgConfigs(orgsJson);
-    const channels = configTransformers.transformChannelConfigs(channelsJson, orgs);
-    const chaincodes = configTransformers.transformChaincodesConfig(chaincodesJson, channels);
-
-    const transformedConfig = {
-      capabilities,
-      rootOrg,
-      orgs,
-      channels,
-      chaincodes,
-    };
+    const fabricaConfig = this.fs.readJSON(this.options.fabricaConfigPath);
+    const transformedConfig = configTransformers.transformFabricaConfig(fabricaConfig);
 
     this.log(JSON.stringify(transformedConfig, null, 4));
   }

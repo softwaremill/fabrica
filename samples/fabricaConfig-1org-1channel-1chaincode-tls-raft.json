@@ -4,7 +4,15 @@
     "fabricVersion": "1.4.6",
     "tls": true,
     "monitoring": {
-      "loglevel": "debug"
+      "loglevel": "debug",
+      "grayLog": {
+        "image": "graylog/graylog",
+        "versionTag": "4.0.3-1",
+        "mongoImage": "mongo",
+        "mongoVersionTag": "4.2",
+        "elasticImage": "docker.elastic.co/elasticsearch/elasticsearch-oss",
+        "elasticVersionTag": "7.10.1"
+      }
     }
   },
   "rootOrg": {
