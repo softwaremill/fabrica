@@ -8,11 +8,13 @@ services:
     container_name: <%= rootOrg.ca.address %>
     image: hyperledger/fabric-ca:${FABRIC_CA_VERSION}
     environment:
-      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
-      - FABRIC_CA_SERVER_CA_NAME=<%= rootOrg.ca.address %>
-      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server/crypto/ca.<%= rootOrg.domain %>-cert.pem
-      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server/crypto/priv-key.pem
-      - FABRIC_LOGGING_SPEC=${LOGGING_LEVEL}
+      FABRIC_CA_HOME: "/etc/hyperledger/fabric-ca-server"
+      FABRIC_CA_SERVER_CA_NAME: "<%= rootOrg.ca.address %>"
+      FABRIC_CA_SERVER_CA_CERTFILE: "/etc/hyperledger/fabric-ca-server/crypto/ca.<%= rootOrg.domain %>-cert.pem"
+      FABRIC_CA_SERVER_CA_KEYFILE: "/etc/hyperledger/fabric-ca-server/crypto/priv-key.pem"
+      FABRIC_LOGGING_SPEC: "${LOGGING_LEVEL}"<% if( rootOrg.ca.db.type==="postgres") { %>
+      FABRIC_CA_SERVER_DB_TYPE: "postgres"
+      FABRIC_CA_SERVER_DB_DATASOURCE: "host=<%= rootOrg.ca.db.address %> port=5432 user=postgres password=postgres dbname=postgres ssl-mode=disable"<% } %>
     ports:
       - <%= rootOrg.ca.exposePort %>:<%= rootOrg.ca.port %>
     working_dir: /etc/hyperledger/fabric-ca-server
@@ -20,7 +22,23 @@ services:
     volumes:
       - ../fabric-config/crypto-config/ordererOrganizations/<%= rootOrg.domain %>/ca/:/etc/hyperledger/fabric-ca-server/crypto
     networks:
+      - basic<% if( rootOrg.ca.db.type==="postgres") { %>
+    depends_on:
+      - <%= rootOrg.ca.db.address %><% } %>
+
+  <% if( rootOrg.ca.db.type==="postgres") { %>
+  <%= rootOrg.ca.db.address %>:
+    container_name: <%= rootOrg.ca.db.address %>
+    image: postgres:12.6-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - <%= rootOrg.ca.db.port %>:5432
+    networks:
       - basic
+  <% } %>
 
   <% rootOrg.orderers.forEach(function(orderer){ %>
   <%= orderer.address %>:
@@ -60,11 +78,13 @@ services:
     container_name: <%= org.ca.address %>
     image: hyperledger/fabric-ca:${FABRIC_CA_VERSION}
     environment:
-      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
-      - FABRIC_CA_SERVER_CA_NAME=<%= org.ca.address %>
-      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server/crypto/ca.<%= org.domain %>-cert.pem
-      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server/crypto/priv-key.pem
-      - FABRIC_LOGGING_SPEC=${LOGGING_LEVEL}
+      FABRIC_CA_HOME: "/etc/hyperledger/fabric-ca-server"
+      FABRIC_CA_SERVER_CA_NAME: "<%= org.ca.address %>"
+      FABRIC_CA_SERVER_CA_CERTFILE: "/etc/hyperledger/fabric-ca-server/crypto/ca.<%= org.domain %>-cert.pem"
+      FABRIC_CA_SERVER_CA_KEYFILE: "/etc/hyperledger/fabric-ca-server/crypto/priv-key.pem"
+      FABRIC_LOGGING_SPEC: "${LOGGING_LEVEL}"<% if( org.ca.db.type==="postgres") { %>
+      FABRIC_CA_SERVER_DB_TYPE: "postgres"
+      FABRIC_CA_SERVER_DB_DATASOURCE: "host=<%= org.ca.db.address %> port=5432 user=postgres password=postgres dbname=postgres ssl-mode=disable"<% } %>
     ports:
       - <%= org.ca.exposePort %>:<%= org.ca.port %>
     working_dir: /etc/hyperledger/fabric-ca-server
@@ -72,7 +92,23 @@ services:
     volumes:
       - ../fabric-config/crypto-config/peerOrganizations/<%= org.domain %>/ca/:/etc/hyperledger/fabric-ca-server/crypto
     networks:
+      - basic<% if( org.ca.db.type==="postgres") { %>
+    depends_on:
+      - <%=org.ca.db.address %><% } %>
+
+  <% if( org.ca.db.type==="postgres") { %>
+  <%= org.ca.db.address %>:
+    container_name: <%= org.ca.db.address %>
+    image: postgres:12.6-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - <%= org.ca.db.port %>:5432
+    networks:
       - basic
+  <% } %>
 
   cli.<%= org.domain %>:
     container_name: cli.<%= org.domain %>

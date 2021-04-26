@@ -306,6 +306,7 @@ Object {
       "default": Array [
         Object {
           "ca": Object {
+            "db": "sqlite3",
             "prefix": "ca",
           },
           "organization": Object {
@@ -327,8 +328,19 @@ Object {
         "properties": Object {
           "ca": Object {
             "$id": "#/properties/orgs/items/properties/ca",
-            "additionalProperties": false,
+            "additionalProperties": true,
             "properties": Object {
+              "db": Object {
+                "$id": "#/properties/rootOrg/properties/ca/properties/db",
+                "description": "CA may use different db's. Default is embedded sqllite instance, but external Postgres is another option",
+                "enum": Array [
+                  "sqlite3",
+                  "postgres",
+                  "mysql",
+                ],
+                "title": "CA db type",
+                "type": "string",
+              },
               "prefix": Object {
                 "$id": "#/properties/orgs/items/properties/ca/properties/prefix",
                 "pattern": "^[a-z0-9\\\\.\\\\-]+$",
@@ -441,11 +453,23 @@ Object {
       "properties": Object {
         "ca": Object {
           "$id": "#/properties/rootOrg/properties/ca",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "default": Object {
+            "db": "sqlite3",
             "prefix": "ca",
           },
           "properties": Object {
+            "db": Object {
+              "$id": "#/properties/rootOrg/properties/ca/properties/db",
+              "description": "CA may use different db's. Default is embedded sqllite instance, but external Postgres is another option",
+              "enum": Array [
+                "sqlite3",
+                "postgres",
+                "mysql",
+              ],
+              "title": "CA db type",
+              "type": "string",
+            },
             "prefix": Object {
               "$id": "#/properties/rootOrg/properties/ca/properties/prefix",
               "pattern": "^[a-z0-9\\\\.\\\\-]+$",

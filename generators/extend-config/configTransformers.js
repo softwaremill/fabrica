@@ -80,13 +80,21 @@ function transformOrderersConfig(ordererJsonConfigFormat, rootDomainJsonConfigFo
     });
 }
 
-function transformCaConfig(caJsonFormat, orgName, orgDomainJsonFormat, caExposePort) {
+function transformCaConfig(caJsonFormat, orgName, orgDomainJsonFormat, caExposePort, dbExposePort) {
   const address = `${caJsonFormat.prefix}.${orgDomainJsonFormat}`;
   const port = 7054;
+  const dbType = (caJsonFormat.db || 'sqlite3');
+  const db = {
+    type: dbType,
+    address: `${caJsonFormat.prefix}.${dbType}.${orgDomainJsonFormat}`,
+    port: dbExposePort,
+    fullAddress: `${caJsonFormat.prefix}.${dbType}.${orgDomainJsonFormat}:${dbExposePort}`,
+  };
   return {
     prefix: caJsonFormat.prefix,
     address,
     port,
+    db,
     exposePort: caExposePort,
     fullAddress: `${address}:${port}`,
     caAdminNameVar: `${orgName.toUpperCase()}_CA_ADMIN_NAME`,
@@ -106,7 +114,7 @@ function transformRootOrgConfig(rootOrgJsonFormat) {
     mspName: rootOrgJsonFormat.organization.mspName,
     domain,
     organization: rootOrgJsonFormat.organization,
-    ca: transformCaConfig(rootOrgJsonFormat.ca, rootOrgJsonFormat.organization.name, domain, 7030),
+    ca: transformCaConfig(rootOrgJsonFormat.ca, rootOrgJsonFormat.organization.name, domain, 7030, 5432),
     orderers: orderersExtended,
     ordererHead,
   };
@@ -140,6 +148,7 @@ function transformOrgConfig(orgJsonFormat, orgNumber) {
   const headPeerPort = 7060 + 10 * orgNumber;
   const headPeerCouchDbExposePort = 5080 + 10 * orgNumber;
   const caExposePort = 7031 + orgNumber;
+  const dbExposePort = 5433 + orgNumber;
   const orgName = orgJsonFormat.organization.name;
   const orgDomain = orgJsonFormat.organization.domain;
 
@@ -165,7 +174,7 @@ function transformOrgConfig(orgJsonFormat, orgNumber) {
     peers: peersExtended,
     anchorPeers,
     bootstrapPeers: bootstrapPeersStringParam,
-    ca: transformCaConfig(orgJsonFormat.ca, orgName, orgDomain, caExposePort),
+    ca: transformCaConfig(orgJsonFormat.ca, orgName, orgDomain, caExposePort, dbExposePort),
     cli: {
       address: `cli.${orgJsonFormat.organization.domain}`,
     },

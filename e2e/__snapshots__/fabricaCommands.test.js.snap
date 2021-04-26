@@ -57,6 +57,12 @@ Validation warnings count: 0
       \\"prefix\\": \\"ca\\",
       \\"address\\": \\"ca.root.com\\",
       \\"port\\": 7054,
+      \\"db\\": {
+        \\"type\\": \\"sqlite3\\",
+        \\"address\\": \\"ca.sqlite3.root.com\\",
+        \\"port\\": 5432,
+        \\"fullAddress\\": \\"ca.sqlite3.root.com:5432\\"
+      },
       \\"exposePort\\": 7030,
       \\"fullAddress\\": \\"ca.root.com:7054\\",
       \\"caAdminNameVar\\": \\"ORDERER_CA_ADMIN_NAME\\",
@@ -125,6 +131,12 @@ Validation warnings count: 0
         \\"prefix\\": \\"ca\\",
         \\"address\\": \\"ca.org1.com\\",
         \\"port\\": 7054,
+        \\"db\\": {
+          \\"type\\": \\"sqlite3\\",
+          \\"address\\": \\"ca.sqlite3.org1.com\\",
+          \\"port\\": 5433,
+          \\"fullAddress\\": \\"ca.sqlite3.org1.com:5433\\"
+        },
         \\"exposePort\\": 7031,
         \\"fullAddress\\": \\"ca.org1.com:7054\\",
         \\"caAdminNameVar\\": \\"ORG1_CA_ADMIN_NAME\\",
@@ -192,6 +204,12 @@ Validation warnings count: 0
             \\"prefix\\": \\"ca\\",
             \\"address\\": \\"ca.org1.com\\",
             \\"port\\": 7054,
+            \\"db\\": {
+              \\"type\\": \\"sqlite3\\",
+              \\"address\\": \\"ca.sqlite3.org1.com\\",
+              \\"port\\": 5433,
+              \\"fullAddress\\": \\"ca.sqlite3.org1.com:5433\\"
+            },
             \\"exposePort\\": 7031,
             \\"fullAddress\\": \\"ca.org1.com:7054\\",
             \\"caAdminNameVar\\": \\"ORG1_CA_ADMIN_NAME\\",
@@ -257,6 +275,12 @@ Validation warnings count: 0
           \\"prefix\\": \\"ca\\",
           \\"address\\": \\"ca.org1.com\\",
           \\"port\\": 7054,
+          \\"db\\": {
+            \\"type\\": \\"sqlite3\\",
+            \\"address\\": \\"ca.sqlite3.org1.com\\",
+            \\"port\\": 5433,
+            \\"fullAddress\\": \\"ca.sqlite3.org1.com:5433\\"
+          },
           \\"exposePort\\": 7031,
           \\"fullAddress\\": \\"ca.org1.com:7054\\",
           \\"caAdminNameVar\\": \\"ORG1_CA_ADMIN_NAME\\",

@@ -137,7 +137,8 @@
           "type": "object",
           "title": "Root Certificate Authority (CA)",
           "default": {
-            "prefix": "ca"
+            "prefix": "ca",
+            "db": "sqlite3"
           },
           "required": [
             "prefix"
@@ -148,9 +149,20 @@
               "title": "Domain prefix",
               "type": "string",
               "pattern": "^[a-z0-9\\.\\-]+$"
+            },
+            "db": {
+              "$id": "#/properties/rootOrg/properties/ca/properties/db",
+              "type": "string",
+              "title": "CA db type",
+              "description": "CA may use different db's. Default is embedded sqllite instance, but external Postgres is another option",
+              "enum": [
+                "sqlite3",
+                "postgres",
+                "mysql"
+              ]
             }
           },
-          "additionalProperties": false
+          "additionalProperties": true
         },
         "orderer": {
           "$id": "#/properties/rootOrg/properties/orderer",
@@ -203,7 +215,8 @@
       "default": [
         {
           "ca": {
-            "prefix": "ca"
+            "prefix": "ca",
+            "db": "sqlite3"
           },
           "peer": {
             "instances": 2.0,
@@ -279,9 +292,20 @@
                 "title": "Domain prefix",
                 "type": "string",
                 "pattern": "^[a-z0-9\\.\\-]+$"
+              },
+              "db": {
+                "$id": "#/properties/rootOrg/properties/ca/properties/db",
+                "type": "string",
+                "title": "CA db type",
+                "description": "CA may use different db's. Default is embedded sqllite instance, but external Postgres is another option",
+                "enum": [
+                  "sqlite3",
+                  "postgres",
+                  "mysql"
+                ]
               }
             },
-            "additionalProperties": false
+            "additionalProperties": true
           },
           "peer": {
             "$id": "#/properties/orgs/items/properties/peer",
